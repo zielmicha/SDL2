@@ -155,22 +155,36 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
                 }
             }
         }
-    } else if (event->type == SDL_MOUSEMOTION) {
-        if (renderer->logical_w) {
-            event->motion.x -= renderer->viewport.x;
-            event->motion.y -= renderer->viewport.y;
-            event->motion.x = (int)(event->motion.x / renderer->scale.x);
-            event->motion.y = (int)(event->motion.y / renderer->scale.y);
-        }
-    } else if (event->type == SDL_MOUSEBUTTONDOWN ||
+    } else if (event->type == SDL_MOUSEMOTION || event->type == SDL_MOUSEBUTTONDOWN ||
                event->type == SDL_MOUSEBUTTONUP) {
+        int v_x = 0, v_y = 0;
+        float scale_x = 1, scale_y = 1;
+
         if (renderer->logical_w) {
-            event->button.x -= renderer->viewport.x;
-            event->button.y -= renderer->viewport.y;
-            event->button.x = (int)(event->button.x / renderer->scale.x);
-            event->button.y = (int)(event->button.y / renderer->scale.y);
+            v_x = renderer->viewport.x;
+            v_y = renderer->viewport.y;
+            scale_y = renderer->scale.y;
+            scale_x = renderer->scale.x;
+        } else if (renderer->logical_w_backup) {
+            v_x = renderer->viewport_backup.x;
+            v_y = renderer->viewport_backup.y;
+            scale_y = renderer->scale_backup.y;
+            scale_x = renderer->scale_backup.x;
+        }
+
+        if(event->type == SDL_MOUSEMOTION) {
+            event->motion.x -= v_x;
+            event->motion.y -= v_y;
+            event->motion.x = (int)(event->motion.x / scale_x);
+            event->motion.y = (int)(event->motion.y / scale_y);
+        } else {
+            event->button.x -= v_x;
+            event->button.y -= v_y;
+            event->button.x = (int)(event->button.x / scale_x);
+            event->button.y = (int)(event->button.y / scale_y);
         }
     }
+
     return 0;
 }
 
@@ -1553,7 +1567,7 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     if (!renderer->RenderCopyEx) {
         return SDL_SetError("Renderer does not support RenderCopyEx");
     }
-    
+
     real_srcrect.x = 0;
     real_srcrect.y = 0;
     real_srcrect.w = texture->w;
