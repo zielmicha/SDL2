@@ -1624,24 +1624,7 @@ SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         format = SDL_GetWindowPixelFormat(renderer->window);
     }
 
-    real_rect.x = renderer->viewport.x;
-    real_rect.y = renderer->viewport.y;
-    real_rect.w = renderer->viewport.w;
-    real_rect.h = renderer->viewport.h;
-    if (rect) {
-        if (!SDL_IntersectRect(rect, &real_rect, &real_rect)) {
-            return 0;
-        }
-        if (real_rect.y > rect->y) {
-            pixels = (Uint8 *)pixels + pitch * (real_rect.y - rect->y);
-        }
-        if (real_rect.x > rect->x) {
-            int bpp = SDL_BYTESPERPIXEL(format);
-            pixels = (Uint8 *)pixels + bpp * (real_rect.x - rect->x);
-        }
-    }
-
-    return renderer->RenderReadPixels(renderer, &real_rect,
+    return renderer->RenderReadPixels(renderer, rect,
                                       format, pixels, pitch);
 }
 
