@@ -238,9 +238,14 @@ SDL_JoystickIsHaptic(SDL_Joystick * joystick)
     int ret;
 
     /* Must be a valid joystick */
+    #ifdef SDL_JOYSTICK_DISABLED
+    /* if joystick support is disabled it can't be valid */
+    return -1;
+    #else
     if (!SDL_PrivateJoystickValid(joystick)) {
         return -1;
     }
+    #endif
 
     ret = SDL_SYS_JoystickIsHaptic(joystick);
 
@@ -263,10 +268,15 @@ SDL_HapticOpenFromJoystick(SDL_Joystick * joystick)
     SDL_Haptic *haptic;
 
     /* Must be a valid joystick */
+    #ifdef SDL_JOYSTICK_DISABLED
+    /* if joystick support is disabled it can't be valid */
+    return -1;
+    #else
     if (!SDL_PrivateJoystickValid(joystick)) {
         SDL_SetError("Haptic: Joystick isn't valid.");
         return NULL;
     }
+    #endif
 
     /* Joystick must be haptic */
     if (SDL_SYS_JoystickIsHaptic(joystick) <= 0) {
@@ -800,5 +810,3 @@ SDL_HapticRumbleStop(SDL_Haptic * haptic)
 
     return SDL_HapticStopEffect(haptic, haptic->rumble_id);
 }
-
-
